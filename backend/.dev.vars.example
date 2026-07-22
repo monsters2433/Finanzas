@@ -1,0 +1,7 @@
+# Copia este archivo a `.dev.vars` (git-ignored) para desarrollo local con `wrangler dev`.
+# En producción usa:  wrangler secret put NOMBRE
+
+AUTH_SECRET="cambia-esto-por-una-cadena-larga-y-aleatoria"
+# STRIPE_SECRET_KEY="sk_test_..."
+# STRIPE_WEBHOOK_SECRET="whsec_..."
+# RESEND_API_KEY="re_..."

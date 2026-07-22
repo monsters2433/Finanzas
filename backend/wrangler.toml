@@ -1,0 +1,32 @@
+name = "ciclo-api"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# --- Base de datos D1 ---
+# 1) npm run db:create   -> copia aquí el database_id que devuelve
+# 2) npm run db:migrate  -> aplica las migraciones en local
+[[d1_databases]]
+binding = "DB"
+database_name = "ciclo-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+# --- Almacenamiento de tickets/recibos (opcional, para el OCR) ---
+# Descomenta cuando crees el bucket:  wrangler r2 bucket create ciclo-receipts
+# [[r2_buckets]]
+# binding = "RECEIPTS"
+# bucket_name = "ciclo-receipts"
+
+# --- Variables públicas ---
+[vars]
+APP_ORIGIN = "http://localhost:8788"
+
+# --- Secretos (NO se ponen aquí; usa `wrangler secret put NOMBRE`) ---
+# AUTH_SECRET            -> firma de los tokens de sesión (genera uno largo y aleatorio)
+# STRIPE_SECRET_KEY      -> pagos
+# STRIPE_WEBHOOK_SECRET  -> verificación del webhook de Stripe
+# RESEND_API_KEY         -> envío de emails (recordatorios)
+
+# --- Recordatorios diarios (Cron) ---
+[triggers]
+crons = ["0 8 * * *"]
