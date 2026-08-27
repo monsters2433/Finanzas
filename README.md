@@ -23,13 +23,16 @@ las llamadas al proveedor bancario y al servicio de push de tu navegador.
 
 ```bash
 npm install
-cp .env.example .env      # rellena lo que necesites
-npm run vapid             # genera VAPID_PUBLIC_KEY y VAPID_PRIVATE_KEY -> .env
+npm run setup             # crea .env, contraseña y claves de notificaciones
 npm run build
 npm start                 # http://localhost:3000
 ```
 
 Para desarrollo: `npm run dev`.
+
+**En Windows**: doble clic en `instalar.cmd` y luego en `iniciar.cmd`.
+La guía paso a paso, incluido cómo usarlo desde el móvil, está en
+[`docs/instalacion.md`](docs/instalacion.md).
 
 Sin configurar nada puedes entrar y pulsar **Ajustes → Cargar datos de ejemplo**:
 genera 14 meses de nóminas, gastos fijos y suscripciones ficticios para ver la
