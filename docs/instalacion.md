@@ -5,12 +5,21 @@
 ### 1. Instala Node.js
 
 Descarga la versión **LTS** de [nodejs.org](https://nodejs.org) y la instalas con
-todo por defecto. Hace falta Node 20.9 o superior.
+todo por defecto (la opción de añadirlo al PATH ya viene marcada; la casilla de
+herramientas adicionales puedes dejarla sin marcar). Hace falta Node 20.9 o
+superior.
 
-Para comprobar que ha ido bien, abre **PowerShell** y escribe:
+Alternativa por consola: `winget install OpenJS.NodeJS.LTS`
+
+**Después de instalarlo, cierra la ventana de comandos y abre una nueva.** Una
+ventana ya abierta conserva el PATH antiguo, así que seguiría diciendo que no
+reconoce `npm` aunque Node esté instalado.
+
+Para comprobar que ha ido bien, en una ventana **nueva**:
 
 ```powershell
 node --version
+npm --version
 ```
 
 ### 2. Descarga el proyecto
@@ -205,6 +214,8 @@ Repite con `job=digest` y un `-Daily -At 21:00` si quieres el resumen de la noch
 | Síntoma | Causa |
 |---|---|
 | «No se encuentra Node.js» al abrir `instalar.cmd` | Node no instalado, o falta cerrar y reabrir la ventana tras instalarlo. |
+| `"npm" no se reconoce como un comando interno o externo` | Lo mismo: falta Node, o la ventana se abrió antes de instalarlo. Ciérrala y abre otra. |
+| `node --version` responde pero `npm --version` no | Instalación incompleta de Node: vuelve a lanzar el instalador y elige **Reparar**. |
 | El móvil no abre la dirección `192.168.x.x` | Cortafuegos de Windows, o el móvil está en otra wifi (o en datos). |
 | No aparece «Activar en este dispositivo» | Estás en HTTP. Las notificaciones exigen HTTPS: opción B o C. |
 | En iPhone no salen las notificaciones | Falta añadir la app a la pantalla de inicio y activarlas **desde ahí**. |
