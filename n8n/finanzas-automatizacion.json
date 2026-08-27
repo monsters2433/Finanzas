@@ -1,0 +1,153 @@
+{
+  "name": "Finanzas — sincronización y avisos",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "hours", "hoursInterval": 3 }
+          ]
+        }
+      },
+      "id": "trigger-sync",
+      "name": "Cada 3 horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-460, -120]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 21 * * *" }
+          ]
+        }
+      },
+      "id": "trigger-digest",
+      "name": "Resumen a las 21:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-460, 160]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.FINANZAS_URL }}/api/cron?job=sync",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-cron-secret", "value": "={{ $env.FINANZAS_CRON_SECRET }}" }
+          ]
+        },
+        "options": { "timeout": 120000 }
+      },
+      "id": "http-sync",
+      "name": "Sincronizar banco",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-200, -120]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.FINANZAS_URL }}/api/cron?job=reminders",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-cron-secret", "value": "={{ $env.FINANZAS_CRON_SECRET }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-reminders",
+      "name": "Avisos de cargos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [280, -220]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.FINANZAS_URL }}/api/cron?job=digest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-cron-secret", "value": "={{ $env.FINANZAS_CRON_SECRET }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-digest",
+      "name": "Resumen diario",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-200, 160]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "version": 2 },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.sync.imported }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-new",
+      "name": "¿Hay movimientos nuevos?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [40, -120]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "resumen",
+              "name": "mensaje",
+              "value": "=💸 {{ ($json.sync.spentCents / 100).toFixed(2) }} € gastados en {{ $json.sync.imported }} movimiento(s) nuevo(s).",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-message",
+      "name": "Mensaje de gasto",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [280, -20],
+      "notes": "Conecta aquí Telegram, WhatsApp, correo o ntfy si quieres un segundo canal además del push del navegador."
+    }
+  ],
+  "connections": {
+    "Cada 3 horas": {
+      "main": [[{ "node": "Sincronizar banco", "type": "main", "index": 0 }]]
+    },
+    "Sincronizar banco": {
+      "main": [[{ "node": "¿Hay movimientos nuevos?", "type": "main", "index": 0 }]]
+    },
+    "¿Hay movimientos nuevos?": {
+      "main": [
+        [
+          { "node": "Avisos de cargos", "type": "main", "index": 0 },
+          { "node": "Mensaje de gasto", "type": "main", "index": 0 }
+        ],
+        [{ "node": "Avisos de cargos", "type": "main", "index": 0 }]
+      ]
+    },
+    "Resumen a las 21:00": {
+      "main": [[{ "node": "Resumen diario", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "instanceId": "finanzas" },
+  "tags": []
+}
