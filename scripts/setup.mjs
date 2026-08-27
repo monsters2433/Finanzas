@@ -9,7 +9,7 @@ import { randomBytes } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import webpush from "web-push";
+import { generateVapidKeys } from "./vapid.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const envPath = path.join(root, ".env");
@@ -61,7 +61,7 @@ if (!getValue(env, "APP_PASSWORD")) {
 
 // 2. Claves de notificaciones push.
 if (!getValue(env, "VAPID_PUBLIC_KEY") || !getValue(env, "VAPID_PRIVATE_KEY")) {
-  const keys = webpush.generateVAPIDKeys();
+  const keys = generateVapidKeys();
   env = setValue(env, "VAPID_PUBLIC_KEY", keys.publicKey);
   env = setValue(env, "VAPID_PRIVATE_KEY", keys.privateKey);
   if (!getValue(env, "VAPID_SUBJECT")) {
@@ -88,11 +88,24 @@ console.log(`\n.env listo en ${envPath}`);
 for (const change of changes) console.log(`  · ${change}`);
 if (changes.length === 0) console.log("  · Ya estaba todo configurado, no se ha tocado nada.");
 
-console.log(`
+const dependenciesInstalled = existsSync(path.join(root, "node_modules"));
+
+console.log(
+  dependenciesInstalled
+    ? `
 Siguiente paso:
   npm run build
   npm start        ->  http://localhost:3000
+`
+    : `
+Todavía faltan las dependencias. Siguiente paso:
+  npm install
+  npm run build
+  npm start        ->  http://localhost:3000
+`,
+);
 
+console.log(`
 Para conectar el banco necesitas una cuenta gratuita en
 bankaccountdata.gocardless.com y añadir a .env:
   GOCARDLESS_SECRET_ID=...

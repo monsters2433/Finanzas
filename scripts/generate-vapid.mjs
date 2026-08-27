@@ -1,6 +1,6 @@
-import webpush from "web-push";
+import { generateVapidKeys } from "./vapid.mjs";
 
-const keys = webpush.generateVAPIDKeys();
+const keys = generateVapidKeys();
 
 console.log("Añade estas líneas a tu .env:\n");
 console.log(`VAPID_PUBLIC_KEY=${keys.publicKey}`);

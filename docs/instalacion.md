@@ -56,7 +56,8 @@ de configuración `.env`, genera las claves de notificaciones y compila la app.
 Te pedirá una contraseña de acceso; si pulsas Enter te genera una y **la muestra
 en pantalla — apúntala**.
 
-Si prefieres la consola, es lo mismo que:
+Si prefieres la consola, es lo mismo que — **y el orden importa**, `npm install`
+siempre primero, porque los otros dos necesitan lo que descarga:
 
 ```powershell
 npm install
@@ -234,6 +235,8 @@ Repite con `job=digest` y un `-Daily -At 21:00` si quieres el resumen de la noch
 | `"npm" no se reconoce como un comando interno o externo` | Lo mismo: falta Node, o la ventana se abrió antes de instalarlo. Ciérrala y abre otra. |
 | `npm : No se puede cargar el archivo ...\npm.ps1 porque la ejecución de scripts está deshabilitada` | Política de PowerShell. Usa `instalar.cmd`, o `npm.cmd install`, o habilítalos con `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`. |
 | `node --version` responde pero `npm --version` da otro error | Instalación incompleta de Node: vuelve a lanzar el instalador y elige **Reparar**. |
+| `npm error code ENOENT ... open 'C:\WINDOWS\system32\package.json'` | Estás ejecutando npm fuera de la carpeta del proyecto. Haz `cd C:\Users\TuUsuario\finanzas` primero. |
+| `npm run build` falla con `Cannot find module` | Falta `npm install`. |
 | El móvil no abre la dirección `192.168.x.x` | Cortafuegos de Windows, o el móvil está en otra wifi (o en datos). |
 | No aparece «Activar en este dispositivo» | Estás en HTTP. Las notificaciones exigen HTTPS: opción B o C. |
 | En iPhone no salen las notificaciones | Falta añadir la app a la pantalla de inicio y activarlas **desde ahí**. |
