@@ -22,6 +22,20 @@ node --version
 npm --version
 ```
 
+> **Si `npm` da un error de «la ejecución de scripts está deshabilitada»**:
+> no es culpa de Node. En PowerShell el comando `npm` es un script `npm.ps1`, y
+> Windows bloquea los scripts por defecto (por eso `node --version` sí responde:
+> es un `.exe`). Tres opciones:
+>
+> - Usar `instalar.cmd` con doble clic: es un `.cmd` y esta política no le afecta.
+> - Escribir `npm.cmd install` en vez de `npm install`.
+> - Permitirlos de una vez, solo para tu usuario y sin ser administrador:
+>   ```powershell
+>   Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+>   ```
+>   `RemoteSigned` deja correr los scripts locales —como el de npm, que creó el
+>   instalador en tu disco— y sigue bloqueando los descargados sin firmar.
+
 ### 2. Descarga el proyecto
 
 Con Git:
@@ -49,6 +63,9 @@ npm install
 npm run setup
 npm run build
 ```
+
+(Si PowerShell se queja de que los scripts están deshabilitados, mira el aviso
+del paso 1: o usas `npm.cmd` en lugar de `npm`, o los habilitas.)
 
 > **Si `npm install` falla compilando `better-sqlite3`**: normalmente se descarga
 > ya compilado, pero si tu combinación de Windows y Node no tiene binario listo,
@@ -215,7 +232,8 @@ Repite con `job=digest` y un `-Daily -At 21:00` si quieres el resumen de la noch
 |---|---|
 | «No se encuentra Node.js» al abrir `instalar.cmd` | Node no instalado, o falta cerrar y reabrir la ventana tras instalarlo. |
 | `"npm" no se reconoce como un comando interno o externo` | Lo mismo: falta Node, o la ventana se abrió antes de instalarlo. Ciérrala y abre otra. |
-| `node --version` responde pero `npm --version` no | Instalación incompleta de Node: vuelve a lanzar el instalador y elige **Reparar**. |
+| `npm : No se puede cargar el archivo ...\npm.ps1 porque la ejecución de scripts está deshabilitada` | Política de PowerShell. Usa `instalar.cmd`, o `npm.cmd install`, o habilítalos con `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`. |
+| `node --version` responde pero `npm --version` da otro error | Instalación incompleta de Node: vuelve a lanzar el instalador y elige **Reparar**. |
 | El móvil no abre la dirección `192.168.x.x` | Cortafuegos de Windows, o el móvil está en otra wifi (o en datos). |
 | No aparece «Activar en este dispositivo» | Estás en HTTP. Las notificaciones exigen HTTPS: opción B o C. |
 | En iPhone no salen las notificaciones | Falta añadir la app a la pantalla de inicio y activarlas **desde ahí**. |
