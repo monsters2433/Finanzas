@@ -7,3 +7,7 @@ data/*.db-*
 .env.local
 *.tsbuildinfo
 next-env.d.ts
+
+# Datos personales: nunca al repositorio
+copias/
+exportado/

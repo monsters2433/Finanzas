@@ -8,7 +8,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "vapid": "node scripts/generate-vapid.mjs"
+    "vapid": "node scripts/generate-vapid.mjs",
+    "db:info": "node scripts/db.mjs info",
+    "db:backup": "node scripts/db.mjs backup",
+    "db:export": "node scripts/db.mjs export",
+    "db:restore": "node scripts/db.mjs restore",
+    "db:reset": "node scripts/db.mjs reset"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0",

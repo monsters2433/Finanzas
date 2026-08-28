@@ -9,6 +9,9 @@ import { BudgetPanel } from "@/components/budget-panel";
 import { RulesPanel } from "@/components/rules-panel";
 import { DemoPanel } from "@/components/demo-panel";
 import { LogoutButton } from "@/components/logout-button";
+import { BackupPanel } from "@/components/backup-panel";
+import fs from "node:fs";
+import path from "node:path";
 import { formatCents } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
@@ -79,6 +82,23 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
   }>;
 
   const transactionCount = (db.prepare("SELECT COUNT(*) AS n FROM transactions").get() as { n: number }).n;
+  const oldestDate =
+    (db.prepare("SELECT MIN(booked_date) AS d FROM transactions").get() as { d: string | null }).d;
+
+  // El tamaño real incluye el fichero -wal, donde esperan los cambios recientes.
+  const dbFile = process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "finanzas.db");
+  const sizeOf = (file: string) => {
+    try {
+      return fs.statSync(file).size;
+    } catch {
+      return 0;
+    }
+  };
+  const totalBytes = sizeOf(dbFile) + sizeOf(`${dbFile}-wal`);
+  const sizeLabel =
+    totalBytes < 1024 * 1024
+      ? `${(totalBytes / 1024).toFixed(1)} KB`
+      : `${(totalBytes / 1024 / 1024).toFixed(1)} MB`;
   const notice = params.banco ? CALLBACK_MESSAGES[params.banco] : undefined;
 
   return (
@@ -107,6 +127,13 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
         <BudgetPanel categories={categories} />
         <RulesPanel rules={rules} categories={categories} />
       </div>
+
+      <BackupPanel
+        dbPath={dbFile}
+        sizeLabel={sizeLabel}
+        transactionCount={transactionCount}
+        oldestDate={oldestDate}
+      />
 
       <DemoPanel transactionCount={transactionCount} />
 

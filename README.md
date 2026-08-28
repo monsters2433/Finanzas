@@ -34,6 +34,16 @@ Para desarrollo: `npm run dev`.
 La guía paso a paso, incluido cómo usarlo desde el móvil, está en
 [`docs/instalacion.md`](docs/instalacion.md).
 
+Tus datos viven en un único fichero SQLite (`data/finanzas.db`). Copias de
+seguridad, exportación a Excel y restauración, en
+[`docs/base-de-datos.md`](docs/base-de-datos.md):
+
+```bash
+npm run db:info      # qué hay guardado
+npm run db:backup    # copia (funciona con la app abierta)
+npm run db:export    # movimientos a CSV para Excel
+```
+
 Sin configurar nada puedes entrar y pulsar **Ajustes → Cargar datos de ejemplo**:
 genera 14 meses de nóminas, gastos fijos y suscripciones ficticios para ver la
 app funcionando.
