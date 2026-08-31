@@ -1,0 +1,39 @@
+# Servicio systemd para correr la app sin Docker, dentro de un LXC o una VM.
+#
+# Instalación:
+#   sudo cp deploy/finanzas.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now finanzas
+#
+# Ajusta User, WorkingDirectory y la ruta de node si no coinciden con tu setup.
+
+[Unit]
+Description=Finanzas — gestor de finanzas personales
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=finanzas
+Group=finanzas
+WorkingDirectory=/opt/finanzas
+EnvironmentFile=/opt/finanzas/.env
+# Usar "env" en vez de una ruta fija a npm: dónde queda instalado npm depende
+# de cómo se instaló Node (apt, nvm, tarball...) y varía entre servidores.
+# Antes de activar el servicio comprueba con "which npm" que aparece en tu PATH
+# para el usuario "finanzas" (systemd usa un PATH mínimo: añade la carpeta de
+# npm si hace falta, ver el comentario de Environment=PATH más abajo).
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/usr/bin/env npm start
+Restart=always
+RestartSec=5
+
+# El proceso no necesita nada del sistema: aislarlo limita el daño de un bug.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/finanzas/data /opt/finanzas/copias
+
+[Install]
+WantedBy=multi-user.target

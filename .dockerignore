@@ -1,0 +1,8 @@
+node_modules
+.next
+data
+copias
+exportado
+.env
+*.tsbuildinfo
+.git

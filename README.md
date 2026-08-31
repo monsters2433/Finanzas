@@ -78,8 +78,15 @@ es un requisito de iOS, no de la app.
 
 ## Automatización
 
-`/api/cron` es el único punto de entrada para cualquier programador de tareas.
-Protégelo con `CRON_SECRET` y pásalo por cabecera `x-cron-secret` o `?secret=`.
+La app se programa sola: en cuanto arranca, sincroniza el banco, avisa de los
+cargos próximos y manda el resumen diario, sin cron ni n8n externos (ver
+`src/lib/scheduler.ts`). Por defecto sincroniza cada 3 horas y manda el
+resumen a las 21:00 (hora de Madrid); se ajusta con `AUTO_SYNC_MINUTES` y
+`AUTO_DIGEST_HOUR` en `.env`.
+
+Si prefieres controlarlo desde fuera —por ejemplo porque ya usas n8n para
+otras cosas—, pon `DISABLE_INTERNAL_SCHEDULER=1` y usa `/api/cron`, protegido
+con `CRON_SECRET` por cabecera `x-cron-secret` o `?secret=`.
 
 | Job | Qué hace |
 |---|---|
@@ -135,10 +142,15 @@ A partir de ahí:
 Si algo se clasifica mal, en **Movimientos** puedes marcar o desmarcar cualquier
 ingreso como nómina y el cálculo se rehace.
 
+## Correr en un servidor 24/7
+
+Para un Proxmox, un VPS Linux o cualquier máquina que quieras dejar siempre
+encendida, con Docker o con systemd: [`docs/servidor.md`](docs/servidor.md).
+
 ## Estructura
 
 ```
-src/lib/          dominio: db, banco (PSD2), sync, nóminas, recurrencias, ICS, push
+src/lib/          dominio: db, banco (PSD2), sync, nóminas, recurrencias, ICS, push, programador
 src/app/          páginas (resumen, salario, movimientos, recurrentes, calendario, ajustes)
 src/app/api/      endpoints REST + feed de calendario + /api/cron
 src/components/   UI

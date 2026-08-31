@@ -1,0 +1,19 @@
+services:
+  finanzas:
+    build: .
+    container_name: finanzas
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_PATH: /app/data/finanzas.db
+      BACKUP_DIR: /app/copias
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./copias:/app/copias
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/auth/login',{method:'POST',body:'{}'}).then(()=>process.exit(0)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
