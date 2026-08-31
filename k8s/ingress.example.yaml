@@ -1,0 +1,28 @@
+# Ejemplo para ingress-nginx + cert-manager. Ajusta className y las
+# anotaciones si tu cluster usa Traefik (k3s por defecto), Contour, etc.
+# Sin esto, llega igualmente por Service tipo LoadBalancer o con
+# `kubectl port-forward`, o publícala solo dentro de tu red/Tailscale como
+# se explica en docs/servidor.md.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: finanzas
+  namespace: finanzas
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: ["finanzas.tudominio.com"]
+      secretName: finanzas-tls
+  rules:
+    - host: finanzas.tudominio.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: finanzas
+                port:
+                  number: 80

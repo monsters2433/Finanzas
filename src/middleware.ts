@@ -5,6 +5,7 @@ import { SESSION_COOKIE, authEnabled, safeEqual, sessionToken } from "@/lib/auth
 const PUBLIC_PREFIXES = [
   "/login",
   "/api/auth/login",
+  "/api/health",    // sonda de un orquestador (Kubernetes, Docker...), sin sesión
   "/api/calendar/", // the phone's calendar client authenticates with its own token
   "/api/cron",      // guarded by CRON_SECRET instead
   "/api/bank/callback",

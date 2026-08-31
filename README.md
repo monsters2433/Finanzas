@@ -147,6 +147,9 @@ ingreso como nómina y el cálculo se rehace.
 Para un Proxmox, un VPS Linux o cualquier máquina que quieras dejar siempre
 encendida, con Docker o con systemd: [`docs/servidor.md`](docs/servidor.md).
 
+¿Un clúster de Kubernetes? Sí, con una única réplica — por qué y los
+manifiestos, en [`docs/kubernetes.md`](docs/kubernetes.md).
+
 ## Estructura
 
 ```

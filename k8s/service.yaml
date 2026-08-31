@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: finanzas
+  namespace: finanzas
+spec:
+  selector:
+    app: finanzas
+  ports:
+    - port: 80
+      targetPort: 3000

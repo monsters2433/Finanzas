@@ -1,0 +1,29 @@
+# ReadWriteOnce a propósito: SQLite en modo WAL es de un único escritor y no
+# es seguro sobre almacenamiento compartido entre varios pods/nodos (los
+# volúmenes ReadWriteMany suelen ser NFS o equivalente, y SQLite avisa
+# explícitamente de que su bloqueo de ficheros no es fiable ahí). Si tu
+# StorageClass por defecto solo ofrece RWX, indica una que soporte RWO
+# (storageClassName más abajo).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: finanzas-data
+  namespace: finanzas
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 2Gi
+  # storageClassName: local-path   # ejemplo para k3s; ajusta a tu cluster
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: finanzas-copias
+  namespace: finanzas
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi
+  # storageClassName: local-path

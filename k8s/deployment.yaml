@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: finanzas
+  namespace: finanzas
+spec:
+  # UNA sola réplica, y no es un valor de partida para subir después:
+  # la app usa SQLite (un único escritor) y programa sus propias tareas
+  # (sincronizar el banco, avisos) dentro del propio proceso, sin bloqueo
+  # distribuido. Con 2+ réplicas tendrías dos programadores compitiendo por
+  # el mismo fichero y el banco sincronizado por duplicado. Para escalar de
+  # verdad haría falta cambiar SQLite por una base de datos en red primero.
+  replicas: 1
+  # Recreate, no RollingUpdate: el volumen es ReadWriteOnce, así que un pod
+  # nuevo no puede montarlo mientras el viejo lo sigue teniendo abierto. Con
+  # RollingUpdate el despliegue se quedaría colgado con el pod nuevo en
+  # Pending esperando el volumen.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: finanzas
+  template:
+    metadata:
+      labels:
+        app: finanzas
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+      containers:
+        - name: finanzas
+          image: registry.tudominio.com/finanzas:latest  # sustituye por tu imagen
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: finanzas-env
+          env:
+            - name: DATABASE_PATH
+              value: /app/data/finanzas.db
+            - name: BACKUP_DIR
+              value: /app/copias
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+            - name: copias
+              mountPath: /app/copias
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet: { path: /api/health, port: 3000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/health, port: 3000 }
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            failureThreshold: 3
+          startupProbe:
+            httpGet: { path: /api/health, port: 3000 }
+            periodSeconds: 5
+            failureThreshold: 12   # hasta 60s para que la base de datos abra
+        # Copia de seguridad periódica en el mismo pod, no un CronJob aparte:
+        # un CronJob en otro pod podría programarse en otro nodo y no podría
+        # montar el mismo volumen ReadWriteOnce. Al vivir en el mismo pod,
+        # comparte los volúmenes sin ninguna de esas complicaciones.
+        - name: backup
+          image: registry.tudominio.com/finanzas:latest  # la misma imagen
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              trap 'exit 0' TERM INT
+              while true; do
+                sleep "${BACKUP_INTERVAL_HOURS:-24}h" &
+                wait $!
+                node scripts/db.mjs backup --conservar="${BACKUP_KEEP:-14}" || true
+              done
+          env:
+            - name: DATABASE_PATH
+              value: /app/data/finanzas.db
+            - name: BACKUP_DIR
+              value: /app/copias
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+            - name: copias
+              mountPath: /app/copias
+          resources:
+            requests: { cpu: 10m, memory: 64Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: finanzas-data
+        - name: copias
+          persistentVolumeClaim:
+            claimName: finanzas-copias

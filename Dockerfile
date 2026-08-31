@@ -19,7 +19,10 @@ FROM node:20-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN groupadd -r finanzas && useradd -r -g finanzas finanzas \
+# UID/GID fijos: el manifiesto de Kubernetes fija runAsUser/runAsGroup a este
+# mismo número. Sin fijarlo aquí, useradd le asignaría el siguiente UID de
+# sistema libre, que no tiene por qué coincidir entre imágenes o entornos.
+RUN groupadd -r -g 999 finanzas && useradd -r -u 999 -g finanzas finanzas \
     && mkdir -p /app/data /app/copias && chown -R finanzas:finanzas /app
 
 COPY --from=build --chown=finanzas:finanzas /app/.next ./.next
@@ -34,6 +37,6 @@ EXPOSE 3000
 VOLUME ["/app/data", "/app/copias"]
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s \
-  CMD node -e "fetch('http://localhost:3000/api/auth/login',{method:'POST',body:'{}'}).then(()=>process.exit(0)).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 CMD ["npm", "start"]
